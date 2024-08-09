@@ -10,29 +10,32 @@ export const parseInvoicePDF = async (buffer: Buffer) => {
     // Use the service to extract invoice details
     const extractedData = await extractInvoiceDetails(data.text);
 
-    // Ensure the response has the required fields
-    if (
-      !extractedData ||
-      !extractedData.customerName ||
-      !extractedData.customerAddress ||
-      !extractedData.customerEmail ||
-      !Array.isArray(extractedData.products) ||
-      typeof extractedData.totalAmount !== "number"
-    ) {
-      throw new Error("Extracted data is missing required fields");
+    // Validate and handle missing fields with defaults
+    const customerName = extractedData.customerName || "N/A";
+    const customerAddress = extractedData.customerAddress || "N/A";
+    const customerEmail = extractedData.customerEmail || "N/A";
+    const products = Array.isArray(extractedData.products)
+      ? extractedData.products
+      : [];
+    const totalAmount =
+      typeof extractedData.totalAmount === "number"
+        ? extractedData.totalAmount
+        : 0;
+
+    if (products.length === 0) {
+      throw new Error("No valid products found");
     }
 
-    // Transform and return the data
     return {
-      customerName: extractedData.customerName,
-      customerAddress: extractedData.customerAddress,
-      customerEmail: extractedData.customerEmail,
-      products: extractedData.products.map((product: any) => ({
-        name: product.name,
-        quantity: product.quantity,
-        price: product.price,
+      customerName,
+      customerAddress,
+      customerEmail,
+      products: products.map((product: any) => ({
+        name: product.name || "N/A",
+        quantity: product.quantity || 0,
+        price: product.price || 0,
       })),
-      totalAmount: extractedData.totalAmount,
+      totalAmount,
     };
   } catch (error) {
     console.error("Error parsing PDF:", error);
