@@ -1,7 +1,8 @@
 import express, { Application } from "express";
 import connectDB from "./config/db";
 import { config } from "dotenv";
-// import invoiceRouter from './routes/invoice';
+import invoiceRouter from "./routes/invoice.routes";
+import morgan from "morgan";
 
 config();
 connectDB();
@@ -9,8 +10,8 @@ connectDB();
 const app: Application = express();
 
 app.use(express.json());
-// app.use('/upload', invoiceRouter);
-// app.use('/invoices', invoiceRouter);  // For fetching stored invoices
+app.use(morgan("dev"));
+app.use("/api/v1", invoiceRouter);
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
